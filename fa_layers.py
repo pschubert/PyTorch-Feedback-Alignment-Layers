@@ -7,17 +7,22 @@ from torch.autograd import Variable
 from torch.nn.parameter import Parameter
 from torch.nn.modules.utils import _pair
 
+
 def linear_fa_backward_hook(module, grad_input, grad_output):
     if grad_input[1] is not None:
         grad_input_fa = grad_output[0].mm(module.weight_fa)
         
         return (grad_input[0], grad_input_fa) + grad_input[2:]
 
+
 def conv2d_fa_backward_hook(module, grad_input, grad_output):
     if grad_input[0] is not None:
-        grad_input_fa = torch.nn.grad.conv2d_input(grad_input[0].size(), module.weight_fa, grad_output[0], stride=module.stride, padding=module.padding, dilation=module.dilation, groups=module.groups)
+        grad_input_fa = torch.nn.grad.conv2d_input(
+            grad_input[0].size(), module.weight_fa, grad_output[0], stride=module.stride,
+            padding=module.padding, dilation=module.dilation, groups=module.groups)
         
         return (grad_input_fa,) + grad_input[1:]
+
 
 class LinearFA(nn.Module):
     """
@@ -34,7 +39,8 @@ class LinearFA(nn.Module):
         self.in_features = in_features
         self.out_features = out_features
         self.weight = Parameter(torch.Tensor(out_features, in_features))
-        self.weight_fa = Variable(torch.FloatTensor(out_features, in_features), requires_grad=False)
+        self.weight_fa = Parameter(torch.FloatTensor(out_features, in_features),
+                                   requires_grad=False)
         if bias:
             self.bias = Parameter(torch.Tensor(out_features))
         else:
@@ -58,6 +64,7 @@ class LinearFA(nn.Module):
         return 'in_features={}, out_features={}, bias={}'.format(
             self.in_features, self.out_features, self.bias is not None
         )
+
 
 class _ConvNdFA(nn.Module):
     """
@@ -95,13 +102,15 @@ class _ConvNdFA(nn.Module):
                 in_channels, out_channels // groups, *kernel_size))
 
             self.weight_fa = Parameter(torch.Tensor(
-                in_channels, out_channels // groups, *kernel_size), requires_grad=False)
+                in_channels, out_channels // groups, *kernel_size),
+                requires_grad=False)
         else:
             self.weight = Parameter(torch.Tensor(
                 out_channels, in_channels // groups, *kernel_size))
 
             self.weight_fa = Parameter(torch.Tensor(
-                out_channels, in_channels // groups, *kernel_size), requires_grad=False)
+                out_channels, in_channels // groups, *kernel_size),
+                requires_grad=False)
         if bias:
             self.bias = Parameter(torch.Tensor(out_channels))
         else:
@@ -130,6 +139,7 @@ class _ConvNdFA(nn.Module):
         if self.bias is None:
             s += ', bias=False'
         return s.format(**self.__dict__)
+
 
 class Conv2dFA(_ConvNdFA):
     """

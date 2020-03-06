@@ -2,9 +2,11 @@ import torch
 import torch.nn as nn
 from fa_layers import *
 
+
 class Flatten(nn.Module):
     def forward(self, x):
         return x.view(x.size()[0], -1)
+
 
 class ConvNet(nn.Module):
     def __init__(self, input_channels):
@@ -31,4 +33,3 @@ class ConvNet(nn.Module):
 
     def forward(self, x):
         return self.layers(x)
-

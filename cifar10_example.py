@@ -14,10 +14,7 @@ from utils import progress_bar
 from example_convnet import *
 
 lr_decay = 1e-6
-lr_drop  = 20
-
-def lr_scheduler(epoch):
-    return learning_rate * (0.5 ** (epoch // lr_drop))
+lr_drop = 20
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 best_acc = 0  # best test accuracy
@@ -55,6 +52,7 @@ if device == 'cuda':
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.RMSprop(net.parameters(), lr=0.0001, weight_decay=1e-6)
 
+
 def train(epoch):
     print('\nEpoch: %d' % epoch)
     net.train()
@@ -76,6 +74,7 @@ def train(epoch):
 
         progress_bar(batch_idx, len(trainloader), 'Loss: %.3f | Acc: %.3f%% (%d/%d)'
             % (train_loss/(batch_idx+1), 100.*correct/total, correct, total))
+
 
 def test(epoch):
     global best_acc
